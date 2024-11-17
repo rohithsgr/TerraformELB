@@ -145,6 +145,50 @@ resource "aws_security_group_rule" "flow_alb_to_instance" {
 }
 */
 
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.pvpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+  tags = {
+    Name = "Public route table"
+  }
+}
+
+resource "aws_route_table_association" "pub_rt_assoc_sub1" {
+
+  subnet_id      = aws_subnet.pubsubnet1.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "pub_rt_assoc_sub2" {
+
+  subnet_id      = aws_subnet.pubsubnet2.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.pvpc.id
+
+  /*
+route {
+cidr_block="0.0.0.0/0"
+gateway_id=aws_internet_gateway.igw.id
+}
+*/
+  tags = {
+    Name = "Private route table"
+  }
+}
+
+resource "aws_route_table_association" "private_route_assoc" {
+  subnet_id      = aws_subnet.prisubnet1.id
+  route_table_id = aws_route_table.private_rt.id
+}
+
+
 resource "aws_instance" "awsinstance" {
   for_each      = toset(["instance1", "instance2", "instance3"])
   ami           = "ami-012967cc5a8c9f891"
